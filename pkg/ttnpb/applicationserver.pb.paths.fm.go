@@ -69,3 +69,10 @@ var ApplicationLinkStatsFieldPathsTopLevel = []string{
 	"network_server_address",
 	"up_count",
 }
+var NsAsHandleUplinkRequestFieldPathsNested = []string{
+	"application_uplinks",
+}
+
+var NsAsHandleUplinkRequestFieldPathsTopLevel = []string{
+	"application_uplinks",
+}
