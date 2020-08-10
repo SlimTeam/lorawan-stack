@@ -17,6 +17,20 @@ import sharedMessages from '@ttn-lw/lib/shared-messages'
 
 import { ACTIVATION_MODES, parseLorawanMacVersion } from '@console/lib/device-utils'
 
+const factoryPresetFreqNumericTest = frequencies => {
+  return frequencies.every(freq => {
+    if (typeof freq !== 'undefined') {
+      return !isNaN(parseInt(freq))
+    }
+
+    return true
+  })
+}
+
+const factoryPresetFreqRequiredTest = frequencies => {
+  return frequencies.every(freq => typeof freq !== 'undefined' && freq !== '')
+}
+
 const validationSchema = Yup.object({
   frequency_plan_id: Yup.string().required(sharedMessages.validateRequired),
   lorawan_version: Yup.string().required(sharedMessages.validateRequired),
@@ -80,6 +94,29 @@ const validationSchema = Yup.object({
           }),
         otherwise: schema => schema.strip(),
       })
+    }),
+    ping_slot_frequency: Yup.number().when('$isClassB', {
+      is: true,
+      then: schema => schema.min(100000, Yup.passValues(sharedMessages.validateNumberGte)),
+      otherwise: schema => schema.strip(),
+    }),
+    factory_preset_frequencies: Yup.lazy(frequencies => {
+      if (!Boolean(frequencies)) {
+        return Yup.array().strip()
+      }
+
+      return Yup.array()
+        .default([])
+        .test(
+          'is-valid-frequency',
+          sharedMessages.validateFreqNumberic,
+          factoryPresetFreqNumericTest,
+        )
+        .test(
+          'is-empty-frequency',
+          sharedMessages.validateFreqRequired,
+          factoryPresetFreqRequiredTest,
+        )
     }),
   }),
   session: Yup.object().when(
