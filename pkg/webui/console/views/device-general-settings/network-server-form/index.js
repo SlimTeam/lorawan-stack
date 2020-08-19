@@ -23,6 +23,8 @@ import Select from '@ttn-lw/components/select'
 import Form from '@ttn-lw/components/form'
 import Notification from '@ttn-lw/components/notification'
 
+import MacSettingsSection from '@console/components/mac-settings-section'
+
 import { NsFrequencyPlansSelect } from '@console/containers/freq-plans-select'
 import DevAddrInput from '@console/containers/dev-addr-input'
 
@@ -31,6 +33,7 @@ import sharedMessages from '@ttn-lw/lib/shared-messages'
 import PropTypes from '@ttn-lw/lib/prop-types'
 
 import {
+  DEVICE_CLASSES,
   parseLorawanMacVersion,
   ACTIVATION_MODES,
   LORAWAN_VERSIONS,
@@ -51,6 +54,12 @@ import validationSchema from './validation-schema'
 
 const NetworkServerForm = React.memo(props => {
   const { device, onSubmit, onSubmitSuccess, mayEditKeys, mayReadKeys } = props
+  const {
+    multicast = false,
+    supports_join = false,
+    supports_class_b = false,
+    supports_class_c = false,
+  } = device
 
   const isABP = isDeviceABP(device)
   const isMulticast = isDeviceMulticast(device)
@@ -59,12 +68,47 @@ const NetworkServerForm = React.memo(props => {
   const formRef = React.useRef(null)
 
   const [error, setError] = React.useState('')
-  const [resetsFCnt, setResetsFCnt] = React.useState(
-    (isABP && device.mac_settings && device.mac_settings.resets_f_cnt) || false,
-  )
+
   const [lorawanVersion, setLorawanVersion] = React.useState(
     parseLorawanMacVersion(device.lorawan_version),
   )
+
+  const [deviceClasses, setDeviceClasses] = React.useState(() => {
+    const deviceClasses = [DEVICE_CLASSES.CLASS_A]
+
+    if (supports_class_b) {
+      deviceClasses.push(DEVICE_CLASSES.CLASS_B)
+    }
+
+    if (supports_class_c) {
+      deviceClasses.push(DEVICE_CLASSES.CLASS_C)
+    }
+
+    return deviceClasses
+  })
+  const handleDeviceClassChange = React.useCallback(evt => {
+    const { checked, name } = evt.target
+
+    let cls
+    if (name === 'supports_class_b') {
+      cls = DEVICE_CLASSES.CLASS_B
+    } else if (name === 'supports_class_c') {
+      cls = DEVICE_CLASSES.CLASS_C
+    }
+
+    if (checked && typeof cls !== 'undefined') {
+      setDeviceClasses(classes => [...classes, cls])
+    } else if (!checked && typeof cls !== 'undefined') {
+      setDeviceClasses(classes => classes.filter(c => c !== cls))
+    }
+  }, [])
+
+  let activationMode = ACTIVATION_MODES.ABP
+  if (supports_join) {
+    activationMode = ACTIVATION_MODES.OTAA
+  } else if (multicast) {
+    activationMode = ACTIVATION_MODES.MULTICAST
+  }
 
   const validationContext = React.useMemo(
     () => ({
@@ -76,23 +120,14 @@ const NetworkServerForm = React.memo(props => {
     [device, mayEditKeys, mayReadKeys],
   )
 
-  const initialValues = React.useMemo(() => {
-    const { multicast = false, supports_join = false } = device
-
-    let _activation_mode = ACTIVATION_MODES.ABP
-    if (supports_join) {
-      _activation_mode = ACTIVATION_MODES.OTAA
-    } else if (multicast) {
-      _activation_mode = ACTIVATION_MODES.MULTICAST
-    }
-
-    const values = {
-      ...device,
-      _activation_mode,
-    }
-
-    return validationSchema.cast(values, { context: validationContext })
-  }, [device, validationContext])
+  const initialValues = React.useMemo(
+    () =>
+      validationSchema.cast(
+        { ...device, _activation_mode: activationMode },
+        { context: validationContext },
+      ),
+    [activationMode, device, validationContext],
+  )
 
   const onFormSubmit = React.useCallback(
     async (values, { resetForm, setSubmitting }) => {
@@ -111,12 +146,6 @@ const NetworkServerForm = React.memo(props => {
     },
     [initialValues, onSubmit, onSubmitSuccess, validationContext],
   )
-
-  const handleResetsFCntChange = React.useCallback(evt => {
-    const { checked } = evt.target
-
-    setResetsFCnt(checked)
-  }, [])
 
   const handleVersionChange = React.useCallback(
     version => {
@@ -198,11 +227,13 @@ const NetworkServerForm = React.memo(props => {
         title={sharedMessages.supportsClassB}
         name="supports_class_b"
         component={Checkbox}
+        onChange={handleDeviceClassChange}
       />
       <Form.Field
         title={sharedMessages.supportsClassC}
         name="supports_class_c"
         component={Checkbox}
+        onChange={handleDeviceClassChange}
       />
       <Form.Field
         title={sharedMessages.activationMode}
@@ -218,15 +249,6 @@ const NetworkServerForm = React.memo(props => {
       </Form.Field>
       {(isABP || isMulticast || isJoinedOTAA) && (
         <>
-          {!isMulticast && !isJoinedOTAA && (
-            <Form.Field
-              title={sharedMessages.resetsFCnt}
-              onChange={handleResetsFCntChange}
-              warning={resetsFCnt ? sharedMessages.resetWarning : undefined}
-              name="mac_settings.resets_f_cnt"
-              component={Checkbox}
-            />
-          )}
           {showResetNotification && <Notification content={messages.keysResetWarning} info small />}
           <DevAddrInput
             title={sharedMessages.devAddr}
@@ -281,6 +303,7 @@ const NetworkServerForm = React.memo(props => {
           )}
         </>
       )}
+      <MacSettingsSection activationMode={activationMode} deviceClasses={deviceClasses} />
       <SubmitBar>
         <Form.Submit component={SubmitButton} message={sharedMessages.saveChanges} />
       </SubmitBar>
