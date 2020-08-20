@@ -73,33 +73,26 @@ const NetworkServerForm = React.memo(props => {
     parseLorawanMacVersion(device.lorawan_version),
   )
 
-  const [deviceClasses, setDeviceClasses] = React.useState(() => {
-    const deviceClasses = [DEVICE_CLASSES.CLASS_A]
+  const [deviceClass, setDeviceClass] = React.useState(() => {
+    if (supports_class_c) {
+      return DEVICE_CLASSES.CLASS_C
+    }
 
     if (supports_class_b) {
-      deviceClasses.push(DEVICE_CLASSES.CLASS_B)
+      return DEVICE_CLASSES.CLASS_B
     }
 
-    if (supports_class_c) {
-      deviceClasses.push(DEVICE_CLASSES.CLASS_C)
-    }
-
-    return deviceClasses
+    return DEVICE_CLASSES.CLASS_A
   })
   const handleDeviceClassChange = React.useCallback(evt => {
     const { checked, name } = evt.target
 
-    let cls
-    if (name === 'supports_class_b') {
-      cls = DEVICE_CLASSES.CLASS_B
-    } else if (name === 'supports_class_c') {
-      cls = DEVICE_CLASSES.CLASS_C
-    }
-
-    if (checked && typeof cls !== 'undefined') {
-      setDeviceClasses(classes => [...classes, cls])
-    } else if (!checked && typeof cls !== 'undefined') {
-      setDeviceClasses(classes => classes.filter(c => c !== cls))
+    if (name === 'supports_class_c' && checked) {
+      setDeviceClass(DEVICE_CLASSES.CLASS_C)
+    } else if (name === 'supports_class_b' && checked) {
+      setDeviceClass(DEVICE_CLASSES.CLASS_B)
+    } else {
+      setDeviceClass(DEVICE_CLASSES.CLASS_A)
     }
   }, [])
 
@@ -303,7 +296,7 @@ const NetworkServerForm = React.memo(props => {
           )}
         </>
       )}
-      <MacSettingsSection activationMode={activationMode} deviceClasses={deviceClasses} />
+      <MacSettingsSection activationMode={activationMode} deviceClass={deviceClass} />
       <SubmitBar>
         <Form.Submit component={SubmitButton} message={sharedMessages.saveChanges} />
       </SubmitBar>

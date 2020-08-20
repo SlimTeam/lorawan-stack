@@ -120,7 +120,7 @@ const validationSchema = Yup.object()
             })
           }),
           rx1_data_rate_offset: Yup.lazy(() => {
-            if (mode !== ACTIVATION_MODES.ABP && mode !== ACTIVATION_MODES.OTAA) {
+            if (mode !== ACTIVATION_MODES.ABP) {
               return Yup.number().strip()
             }
 
