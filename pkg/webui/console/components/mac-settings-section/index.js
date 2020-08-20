@@ -66,10 +66,9 @@ const pingSlotPeriodicityOptions = Array.from({ length: 8 }, (_, index) => {
 })
 
 const MacSettingsSection = props => {
-  const { activationMode, deviceClasses, resetsFCnt: initialFCnt, initiallyCollapsed } = props
+  const { activationMode, deviceClass, resetsFCnt: initialFCnt, initiallyCollapsed } = props
 
-  const isClassB = deviceClasses.includes(DEVICE_CLASSES.CLASS_B)
-  const isOTAA = activationMode === ACTIVATION_MODES.OTAA
+  const isClassB = deviceClass === DEVICE_CLASSES.CLASS_B
   const isABP = activationMode === ACTIVATION_MODES.ABP
 
   const [resetsFCnt, setResetsFCnt] = React.useState(isABP && initialFCnt)
@@ -87,35 +86,33 @@ const MacSettingsSection = props => {
     >
       <Form.SubTitle title={m.macSettings} />
       {isABP && (
-        <Form.Field
-          title={m.rx1DelayTitle}
-          type="number"
-          description={m.rx1DelayDescription}
-          name="mac_settings.rx1_delay.value"
-          component={Input}
-          min={1}
-          max={15}
-        />
-      )}
-      {(isABP || isOTAA) && (
-        <Form.Field
-          title={m.rx1DataRateOffsetTitle}
-          description={m.rx1DataRateOffsetDescription}
-          type="number"
-          name="mac_settings.rx1_data_rate_offset"
-          component={Input}
-          min={0}
-          max={7}
-        />
-      )}
-      {isABP && (
-        <Form.Field
-          title={m.resetsFCnt}
-          onChange={handleResetsFCntChange}
-          warning={resetsFCnt ? m.resetWarning : undefined}
-          name="mac_settings.resets_f_cnt"
-          component={Checkbox}
-        />
+        <>
+          <Form.Field
+            title={m.rx1DelayTitle}
+            type="number"
+            description={m.rx1DelayDescription}
+            name="mac_settings.rx1_delay.value"
+            component={Input}
+            min={1}
+            max={15}
+          />
+          <Form.Field
+            title={m.rx1DataRateOffsetTitle}
+            description={m.rx1DataRateOffsetDescription}
+            type="number"
+            name="mac_settings.rx1_data_rate_offset"
+            component={Input}
+            min={0}
+            max={7}
+          />
+          <Form.Field
+            title={m.resetsFCnt}
+            onChange={handleResetsFCntChange}
+            warning={resetsFCnt ? m.resetWarning : undefined}
+            name="mac_settings.resets_f_cnt"
+            component={Checkbox}
+          />
+        </>
       )}
       <Form.Field
         title={m.rx2DataRateIndexTitle}
@@ -172,7 +169,7 @@ const MacSettingsSection = props => {
 
 MacSettingsSection.propTypes = {
   activationMode: PropTypes.oneOf(Object.values(ACTIVATION_MODES)).isRequired,
-  deviceClasses: PropTypes.arrayOf(PropTypes.oneOf(Object.values(DEVICE_CLASSES))).isRequired,
+  deviceClass: PropTypes.oneOf(Object.values(DEVICE_CLASSES)).isRequired,
   initiallyCollapsed: PropTypes.bool,
   resetsFCnt: PropTypes.bool,
 }
