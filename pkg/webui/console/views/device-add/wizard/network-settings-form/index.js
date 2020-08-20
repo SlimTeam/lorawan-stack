@@ -97,25 +97,20 @@ const NetworkSettingsForm = props => {
     setResetsFCnt(checked)
   }, [])
 
-  const [deviceClasses, setDeviceClasses] = React.useState([DEVICE_CLASSES.CLASS_A])
+  const [deviceClass, setDeviceClass] = React.useState(DEVICE_CLASSES.CLASS_A)
   const handleDeviceClassChange = React.useCallback(evt => {
     const { checked, name } = evt.target
 
-    let cls
-    if (name === 'supports_class_b') {
-      cls = DEVICE_CLASSES.CLASS_B
-    } else if (name === 'supports_class_c') {
-      cls = DEVICE_CLASSES.CLASS_C
-    }
-
-    if (checked && typeof cls !== 'undefined') {
-      setDeviceClasses(classes => [...classes, cls])
-    } else if (!checked && typeof cls !== 'undefined') {
-      setDeviceClasses(classes => classes.filter(c => c !== cls))
+    if (name === 'supports_class_c' && checked) {
+      setDeviceClass(DEVICE_CLASSES.CLASS_C)
+    } else if (name === 'supports_class_b' && checked) {
+      setDeviceClass(DEVICE_CLASSES.CLASS_B)
+    } else {
+      setDeviceClass(DEVICE_CLASSES.CLASS_A)
     }
   }, [])
 
-  const isClassB = deviceClasses.includes(DEVICE_CLASSES.CLASS_B)
+  const isClassB = deviceClass === DEVICE_CLASSES.CLASS_B
   const isABP = activationMode === ACTIVATION_MODES.ABP
   const isMulticast = activationMode === ACTIVATION_MODES.MULTICAST
   const lwVersion = parseLorawanMacVersion(lorawanVersion)
@@ -243,7 +238,7 @@ const NetworkSettingsForm = props => {
           )}
         </>
       )}
-      <MacSettingsSection activationMode={activationMode} deviceClasses={deviceClasses} />
+      <MacSettingsSection activationMode={activationMode} deviceClass={deviceClass} />
     </Wizard.Form>
   )
 }

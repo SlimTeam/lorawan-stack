@@ -57,7 +57,7 @@ const validationSchema = Yup.object({
       })
     }),
     rx1_data_rate_offset: Yup.number().when('$activationMode', {
-      is: mode => mode === ACTIVATION_MODES.ABP || mode === ACTIVATION_MODES.OTAA,
+      is: ACTIVATION_MODES.ABP,
       then: schema =>
         schema
           .min(0, Yup.passValues(sharedMessages.validateNumberGte))
