@@ -20,6 +20,7 @@ import { injectIntl } from 'react-intl'
 import Icon from '@ttn-lw/components/icon'
 
 import { withEnv } from '@ttn-lw/lib/components/env'
+import stringToSlug from '@ttn-lw/lib/string-to-slug'
 
 import PropTypes from '@ttn-lw/lib/prop-types'
 import { url as urlPattern } from '@ttn-lw/lib/regexp'
@@ -194,6 +195,18 @@ DocLink.defaultProps = {
   showVisited: false,
   to: undefined,
 }
+
+const GlossaryLink = function({term, ...rest}) {
+  const urlTerm = stringToSlug(term)
+  return <Link.DocLink path={"/reference/glossary#" + urlTerm} {...rest}>{term}</Link.DocLink>
+}
+
+GlossaryLink.propTypes = {
+  ...Link.propTypes,
+  term: PropTypes.string.isRequired
+}
+
+Link.GlossaryLink = injectIntl(GlossaryLink)
 
 const AnchorLink = function(props) {
   const {

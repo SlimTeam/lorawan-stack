@@ -18,6 +18,7 @@ import classnames from 'classnames'
 import { getIn } from 'formik'
 
 import Icon from '@ttn-lw/components/icon'
+import Link from '@ttn-lw/components/link'
 
 import Message from '@ttn-lw/lib/components/message'
 
@@ -68,6 +69,7 @@ class FormField extends React.Component {
     ]).isRequired,
     decode: PropTypes.func,
     description: PropTypes.message,
+    glossaryTerm: PropTypes.string,
     disabled: PropTypes.bool,
     encode: PropTypes.func,
     name: PropTypes.string.isRequired,
@@ -86,6 +88,7 @@ class FormField extends React.Component {
     onChange: () => null,
     warning: '',
     description: '',
+    glossaryTerm: '',
     readOnly: false,
     required: false,
   }
@@ -161,6 +164,7 @@ class FormField extends React.Component {
       disabled,
       required,
       readOnly,
+      glossaryTerm,
       component: Component,
     } = this.props
     const { horizontal, disabled: formDisabled } = this.context
@@ -173,18 +177,30 @@ class FormField extends React.Component {
     const hasError = Boolean(fieldError)
     const hasWarning = Boolean(warning)
     const hasDescription = Boolean(description)
+    const hasGlossaryTerm = Boolean(glossaryTerm)
+    const hasCombinedDescription = hasDescription || hasGlossaryTerm
 
     const showError = fieldTouched && hasError
     const showWarning = !hasError && hasWarning
-    const showDescription = !showError && !showWarning && hasDescription
+    const showCombinedDescription = !showError && !showWarning && hasCombinedDescription
 
     const describedBy = showError
       ? `${name}-field-error`
       : showWarning
       ? `${name}-field-warning`
-      : showDescription
+      : showCombinedDescription
       ? `${name}-field-description`
       : undefined
+
+    const combinedDescription =
+      <React.Fragment>
+        { hasDescription &&
+          <Message className={style.description} content={description} id={describedBy} />
+        }
+        { hasGlossaryTerm &&
+          <Link.GlossaryLink term={glossaryTerm} />
+        }
+      </React.Fragment>
 
     const fieldMessage = showError ? (
       <div className={style.messages}>
@@ -194,8 +210,8 @@ class FormField extends React.Component {
       <div className={style.messages}>
         <Err content={warning} title={title} warning id={describedBy} />
       </div>
-    ) : showDescription ? (
-      <Message className={style.description} content={description} id={describedBy} />
+    ) : showCombinedDescription ? (
+      combinedDescription
     ) : null
 
     const fieldComponentProps = {
