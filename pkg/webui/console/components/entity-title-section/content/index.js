@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import EntityTitleSection from './entity-title-section'
 import EntityTitleSectionContent from './content'
+import EntityCount from './entity-count'
+import MessagesCount from './messages-count'
 
-EntityTitleSection.Content = EntityTitleSectionContent
+EntityTitleSectionContent.EntityCount = EntityCount
+EntityTitleSectionContent.MessagesCount = MessagesCount
 
-export default EntityTitleSection
+export default EntityTitleSectionContent

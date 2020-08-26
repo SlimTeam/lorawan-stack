@@ -12,9 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import EntityTitleSection from './entity-title-section'
-import EntityTitleSectionContent from './content'
+.container
+  padding: $cs.xxs
+  line-height: 1
+  height: $fs.m
+  display: flex
 
-EntityTitleSection.Content = EntityTitleSectionContent
+  &:not(:last-child)
+    margin-right: $cs.l
+    +media-query($bp.s)
+      margin-right: $cs.xs
 
-export default EntityTitleSection
+  .message
+    color: $tc-deep-gray
+
+  &.error
+    .icon,
+    .value,
+    .message
+      color: $c-error
+
+  &.error .message
+    font-weight: 600
+
+.icon
+  color: $c-icon-fill
+  margin-right: $cs.xs
+
+.value
+  color: $tc-deep-gray
+  font-weight: $fw.bold
+  margin-right: $cs.xxs
+
+.container:not(.error)
+  .message
+    +media-query($bp.s)
+      display: none
