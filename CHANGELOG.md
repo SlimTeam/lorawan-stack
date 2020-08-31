@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Scheduling failure events are now emitted on unsuccessful scheduling attempts.
 - Default Javascript function signatures to `encodeDownlink()`, `decodeUplink()` and `decodeDownlink()`.
+- Application, gateway, organization and end device title sections in the Console.
 
 ### Deprecated
 
